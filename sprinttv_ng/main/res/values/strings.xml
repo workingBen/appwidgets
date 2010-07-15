@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="pkg_name">SprintTV Widget</string>
+	<string name="widget_name">Sprint NGTV</string>
+	<string name="url">http://resources.static.mobitv.com/tvtab/sprinttv-android-featured.xml</string>
+	<string name="url_plist">http://denc9.mobitv.com:32080/bpellow/tilesForBen.plist</string>
+	<string name="default_label">Sprint TV</string>
+	<string name="default_description">Launch Sprint TV</string>
+</resources>

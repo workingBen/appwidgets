@@ -1,0 +1,89 @@
+<project name="sprinttv-widget"
+		 xmlns:artifact="antlib:org.apache.maven.artifact.ant"
+		 default="all">
+	
+	<property name="apk.name" value="SprintTVWidget"/>
+	<property name="version" value="1.0"/>
+	
+	<property environment="env"/>
+	<property name="android.sdk.home" value="${env.ANDROID_SDK}"/>
+	<property name="android.target.version" value="2.1"/>
+	<property name="android.tools" value="${android.sdk.home}/tools"/>
+	
+	<echo level="info">android.sdk.home: ${android.sdk.home}</echo>
+	<path id="android.class.path">
+		<pathelement location="${android.sdk.home}/platforms/android-${android.target.version}/android.jar"/>
+	</path>
+	
+	<condition property="dotbat" value=".bat" else="">
+		<os family="windows"/>
+	</condition>
+	<condition property="dotexe" value=".exe" else="" >
+		<os family="windows"/>
+	</condition>
+	
+	<target name="clean">
+		<delete dir="build"/>
+	</target>
+	
+	<target name="res">
+		<mkdir dir="build"/>
+		<mkdir dir="build/src"/>
+		<exec executable="${android.sdk.home}/platforms/android-${android.target.version}/tools/aapt${dotexe}" failonerror="true">
+			<arg value="package"/>
+			<arg value="-v"/>
+			<arg value="-S"/>
+			<arg file="res"/>
+			<arg value="-M"/>
+			<arg file="AndroidManifest.xml"/>
+			<arg value="-F"/>
+			<arg file="build/${apk.name}-assets.apk"/>
+			<arg value="-I"/>
+			<arg file="${android.sdk.home}/platforms/android-${android.target.version}/android.jar"/>
+			<arg value="-m"/>
+			<arg value="-J"/>
+			<arg file="build/src"/>
+		</exec>
+	</target>
+	
+	<target name="compile" depends="res">
+		<mkdir dir="build"/>
+		<mkdir dir="build/classes"/>
+		<javac destdir="build/classes" encoding="utf-8" source="1.5" target="1.5">
+			<src>
+				<pathelement path="src"/>
+				<pathelement path="build/src"/>
+			</src>
+			<bootclasspath refid="android.class.path"/>
+		</javac>
+	</target>
+	
+	<target name="dex" depends="compile">
+		<exec executable="${android.sdk.home}/platforms/android-${android.target.version}/tools/dx${dotbat}" failonerror="true">
+			<arg value="--dex"/>
+			<arg value="--debug"/>
+			<arg value="--verbose"/>
+			<arg value="--dump-to=${basedir}/build/dx.log"/>
+			<arg value="--output=${basedir}/build/classes.dex"/>
+			<arg file="${basedir}/build/classes"/>
+		</exec>
+	</target>
+	
+	<target name="package" depends="res,dex">
+		<exec executable="${android.tools}/apkbuilder${dotbat}" failonerror="true">
+			<arg file="build/${apk.name}.apk"/>
+			<arg value="-v"/>
+			<arg value="-z"/>
+			<arg file="build/${apk.name}-assets.apk"/>
+			<arg value="-f"/>
+			<arg file="build/classes.dex"/>
+		</exec>
+	</target>
+	
+	<target name="release">
+		<mkdir dir="release"/>
+		<copy file="build/${apk.name}.apk" todir="release"/>
+	</target>
+	
+	<target name="all" depends="clean,package"/>
+</project>
